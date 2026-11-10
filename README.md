@@ -1,12 +1,17 @@
-# "This is lit, fam": Diachronic word embeddings and classifying semantic change
+# Short-term semantic change of Reddit slang with diachronic word embeddings
 
-Code for my BA thesis (Undergraduate Thesis, English Philology, Department of
-Languages, Faculty of Arts, University of Helsinki, **May 2020**).
+Can word embeddings show *short-term* semantic change in contemporary English, and can traditional
+categories of semantic change (narrowing/broadening, elevation/degeneration, metaphor, substitution)
+be operationalised with them? This project trains diachronic word2vec embeddings on Reddit comments
+2006–2019, aligned across years with **TWEC – Temporal Word Embeddings with a Compass**, and traces
+how words such as *swipe, fam, noob, lit, sick* and *toxic* changed meaning.
 
-- **Author:** Teemu Pöyhönen
-- **Supervisor:** Joseph Flanagan
-- **Thesis PDF:** [thesis/ba_thesis_teemu_poyhonen.pdf](thesis/ba_thesis_teemu_poyhonen.pdf)
-  (also at <https://teemursu.github.io/assets/documents/ba_thesis_teemu_poyhonen.pdf>)
+**Author:** Teemu Pöyhönen · **Paper:** *"This is lit, fam": Diachronic word embeddings and classifying
+semantic change* ([PDF](thesis/ba_thesis_teemu_poyhonen.pdf), also at
+<https://teemursu.github.io/assets/documents/ba_thesis_teemu_poyhonen.pdf>)
+
+> Carried out as my BA thesis (English Philology, University of Helsinki, May 2020; supervisor Joseph Flanagan).
+> The code was revived in 2026 to run on Python 3.12 / gensim 4 — see *Running it* below.
 
 ## Summary
 
@@ -38,7 +43,6 @@ test_models.py             exploratory nearest-neighbour checks on the compass (
 scripts/make_toy_corpus.py synthetic drifting corpus for smoke tests
 results/figures_2020/      figures produced in spring 2020 (recovered from the old laptop)
 thesis/                    submitted thesis PDF
-third_party/histwords_viz/ histwords plotting scripts copied in 2019 (reference only, not runnable)
 data/README.md             where the data comes from / where copies are on R:
 ```
 
