@@ -1,0 +1,6 @@
+gensim>=4.3,<5
+numpy
+scikit-learn
+matplotlib
+# optional: reading newer Pushshift .zst dumps
+# zstandard

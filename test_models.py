@@ -1,30 +1,34 @@
-import gensim
-from gensim.test.utils import common_texts
+"""Quick sanity checks on a trained compass model (exploratory, Dec 2019).
+
+    python test_models.py models/compass.model
+
+Ported to gensim 4: the compass is loaded as a Word2Vec model; the unused
+gensim test-data loads were dropped and the undefined `wv` was replaced by the
+compass vectors. Words missing from the vocabulary are skipped.
+"""
+import sys
+
 from gensim.models import Word2Vec
-from gensim.models import KeyedVectors
+
+path = sys.argv[1] if len(sys.argv) > 1 else "models/compass.model"
+compass_wv = Word2Vec.load(path).wv
 
 
-compass_wv = gensim.models.KeyedVectors.load('TWEC_master/model/compass.model')
+def show(label, *args, **kwargs):
+    words = list(kwargs.get("positive", [])) + list(kwargs.get("negative", [])) + [a for a in args if isinstance(a, str)]
+    missing = [w for w in words if w not in compass_wv]
+    if missing:
+        print(label, "-- not in vocabulary:", missing)
+        return
+    print(label, compass_wv.most_similar(*args, **kwargs))
 
-from gensim.test.utils import datapath
 
-wv_from_text = KeyedVectors.load_word2vec_format(datapath('word2vec_pre_kv_c'), binary=False)  # C text format
-wv_from_bin = KeyedVectors.load_word2vec_format(datapath("euclidean_vectors.bin"), binary=True)  # C bin format
-
-#import gensim.downloader as api
-
-#test_word_vectors = api.load("glove-wiki-gigaword-100")
-#test_result = word_vectors.most_similar(positive=['woman', 'king'], negative=['man'])
-
-print(compass_wv.most_similar(positive=['king', 'woman'], negative=['man'], topn=5))
+show("king - man + woman:", positive=['king', 'woman'], negative=['man'], topn=5)
 print()
-print(compass_wv.most_similar(['noob'], topn=5))
-print(compass_wv.most_similar(['wtf'], topn=5))
-print(compass_wv.most_similar(['email'], topn=5))
-print(compass_wv.most_similar(['hangry'], topn=5))
+for w in ['noob', 'wtf', 'email', 'hangry']:
+    show(w + ":", positive=[w], topn=5)
 print()
-print("Most similar to 'lol' ", compass_wv.most_similar(['lol'], topn=10))
-
+show("Most similar to 'lol' ", positive=['lol'], topn=10)
 
 pairs = [
     ('car', 'minivan'),   # a minivan is a kind of car
@@ -36,15 +40,11 @@ pairs = [
     ('rock', 'hard')
 ]
 for w1, w2 in pairs:
-    print('%r\t%r\t%.2f' % (w1, w2, wv.similarity(w1, w2)))
+    if w1 in compass_wv and w2 in compass_wv:
+        print('%r\t%r\t%.2f' % (w1, w2, compass_wv.similarity(w1, w2)))
 
-print(compass_wv.most_similar(['feminism'], topn=20))
-print(compass_wv.most_similar(positive=['mansplaining'], topn=20))
-print(compass_wv.most_similar(positive=['binary', 'trans'], negative=['encoding'], topn=20))
-print("Wholesome: ", compass_wv.most_similar(['wholesome'], topn=10))
-print("Dank: ", compass_wv.most_similar(['dank'], topn=10))
-print("Flex: ", compass_wv.most_similar(['flex'], topn=10))
-print("Salty: ", compass_wv.most_similar(['salty'], topn=10))
-print("Woke: ", compass_wv.most_similar(['woke'], topn=10))
-print("fam: ", compass_wv.most_similar(['fam'], topn=10))
-print("Swag: ", compass_wv.most_similar(['swag'], topn=10))
+show("feminism:", positive=['feminism'], topn=20)
+show("mansplaining:", positive=['mansplaining'], topn=20)
+show("binary + trans - encoding:", positive=['binary', 'trans'], negative=['encoding'], topn=20)
+for w in ['wholesome', 'dank', 'flex', 'salty', 'woke', 'fam', 'swag']:
+    show(w.capitalize() + ": ", positive=[w], topn=10)

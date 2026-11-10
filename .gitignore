@@ -1,6 +1,24 @@
-/MachineLearningForLinguists
-/TWEC_master/examples
-/TWEC_master/model
-model
-.idea
-/writer_files
+# data and trained models stay out of git (see data/README.md)
+/data/*
+!/data/README.md
+/models/
+/model/
+/results/analysis/
+*.model
+*.kv
+*.npy
+*.xz
+*.bz2
+*.zst
+
+# environments / editor junk
+.venv/
+venv/
+__pycache__/
+*.pyc
+.idea/
+.DS_Store
+
+# credentials (never commit)
+praw.ini
+.env

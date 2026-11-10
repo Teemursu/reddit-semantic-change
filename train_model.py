@@ -1,41 +1,48 @@
-from twec.twec import TWEC
-from gensim.models.word2vec import Word2Vec
+"""Train the TWEC compass and one aligned word2vec model per time slice.
+
+Defaults follow the thesis (section 3.5): CBOW, 300 dimensions, 10 iterations,
+window 5, 5 negative samples, min_count 2. (The Dec 2019 version of this
+script used window=10, ns=10.)
+
+    python train_model.py --compass data/compass/compass.txt --slices data/slices --out models
+"""
+import argparse
 import glob
+import os
 
-"""
-def train_data(year, month, comments):
-    '''
-    Write a text file in which each line represents a sentence/comment.
-    '''
-    print("Writing data for comments made in " + year + "/" + month +"...")
-
-    train_string = "\n".join([' '.join(map(str, item)) for item in comments])
-
-    return train_string
+from compass.twec import TWEC
 
 
-def train(string):
-    aligner.train_slice(string, save=True)
-"""
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--compass", default="data/compass/compass.txt", help="compass text file (or folder)")
+    ap.add_argument("--slices", default="data/slices", help="folder of slice .txt files")
+    ap.add_argument("--out", default="models")
+    ap.add_argument("--size", type=int, default=300)
+    ap.add_argument("--siter", type=int, default=10, help="compass (static) epochs")
+    ap.add_argument("--diter", type=int, default=10, help="slice (dynamic) epochs")
+    ap.add_argument("--window", type=int, default=5)
+    ap.add_argument("--ns", type=int, default=5)
+    ap.add_argument("--min-count", type=int, default=2)
+    ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--overwrite", action="store_true", help="retrain the compass even if it exists")
+    args = ap.parse_args()
+
+    print("Declaring the TWEC object...")
+    # siter is the number of iterations of the compass, diter of each slice
+    aligner = TWEC(size=args.size, siter=args.siter, diter=args.diter, workers=args.workers,
+                   min_count=args.min_count, window=args.window, ns=args.ns, sg=0, opath=args.out)
+    # train the compass: the text should be the concatenation of the text from the slices
+    print("Training the compass...")
+    aligner.train_compass(args.compass, overwrite=args.overwrite)
+
+    # now train the slices; they will be already aligned
+    read_files = sorted(glob.glob(os.path.join(args.slices, "*.txt")))
+    for file in read_files:
+        print("Training the slice for " + str(file))
+        aligner.train_slice(file, save=True)
+    print("Done: %d slices in %s" % (len(read_files), args.out))
 
 
-print("Declaring the TWEC object...")
-# decleare a TWEC object, siter is the number of iterations of the compass,
-# diter is the number of iterations of each slice
-aligner = TWEC(size=300, siter=10, diter=10, workers=4, min_count=2, window=10, ns=10, sg=0)
-# train the compass: the text should be the concatenation of the text from the slices
-print("Training the compass...")
-aligner.train_compass("TWEC_master/examples/training/compass.txt", overwrite=True) # keep an eye on the overwrite behaviour
-print("Training complete!")
-
-
-# now you can train slices and they will be already aligned
-# these are gensim word2vec objects
-#slice_one = aligner.train_slice("C:\\Users\\temep\\PycharmProjects\\semantic_change\\comment_data\\data2009-01.txt", save=True)
-#slice_two = aligner.train_slice("comment_data/data2009-02.txt", save=True)
-print("Reading files...")
-read_files = glob.glob("comment_data/1-mil-comm-per-month\\*.txt")
-
-for file in read_files:
-    print("Training the slice for " + str(file))
-    aligner.train_slice(file, save=True, )
+if __name__ == "__main__":
+    main()
